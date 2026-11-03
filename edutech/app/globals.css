@@ -450,6 +450,16 @@ input {
   overflow-wrap: anywhere;
 }
 
+.feedback-empty {
+  margin: 0;
+  padding: 24px 15px;
+  border: 1px dashed #e3e5ea;
+  border-radius: 12px;
+  color: #777e8b;
+  font-size: 13px;
+  text-align: center;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

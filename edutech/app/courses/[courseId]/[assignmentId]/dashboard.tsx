@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import AppHeader from "../../../components/app-header";
-import type { Assignment, Course } from "../../../data/course-data";
+import CourseHeader from "../../../components/course-header";
+import FeedbackPanel from "../../../components/feedback-panel";
+import {
+  categoryNames,
+  type Assignment,
+  type Course,
+} from "../../../data/course-data";
 
 type Props = {
   course: Course;
@@ -40,8 +44,6 @@ function getAssistantReply(question: string, assignment: Assignment): string {
 }
 
 export default function AssignmentDashboard({ course, assignment }: Props) {
-  const router = useRouter();
-  const [categoryFilter, setCategoryFilter] = useState("View all");
   const [chatOpen, setChatOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -50,11 +52,6 @@ export default function AssignmentDashboard({ course, assignment }: Props) {
       content: `I can help you explore the ${assignment.name} report. Ask for a summary, category breakdown, student examples, or follow-up ideas.`,
     },
   ]);
-
-  const visibleFeedback =
-    categoryFilter === "View all"
-      ? assignment.feedback
-      : assignment.feedback.filter((item) => item.category === categoryFilter);
 
   function askAssistant(prompt: string) {
     const trimmedPrompt = prompt.trim();
@@ -80,35 +77,11 @@ export default function AssignmentDashboard({ course, assignment }: Props) {
     <>
       <AppHeader />
       <main className="dashboard">
-        <header className="dashboard-header">
-          <div className="dashboard-heading">
-            <Link className="back-to-courses" href="/courses">
-              <span aria-hidden="true">←</span> Back to courses
-            </Link>
-            <div className="dashboard-title">
-              <span className="dashboard-course-code">COURSE</span>
-              <h1>{course.code}</h1>
-              <p>{assignment.name}</p>
-            </div>
-          </div>
-
-          <label className="assignment-select-wrap" htmlFor="assignment-select">
-            <span className="visually-hidden">Switch assignment</span>
-            <select
-              id="assignment-select"
-              value={assignment.id}
-              onChange={(event) =>
-                router.push(`/courses/${course.id}/${event.target.value}`)
-              }
-            >
-              {course.assignments.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </header>
+        <CourseHeader
+          course={course}
+          subtitle={assignment.name}
+          assignmentId={assignment.id}
+        />
 
       <div className="dashboard-grid">
         <section className="dashboard-left" aria-label="AI usage summary">
@@ -175,41 +148,15 @@ export default function AssignmentDashboard({ course, assignment }: Props) {
           </section>
         </section>
 
-        <section
-          className="panel feedback-panel"
-          aria-labelledby="feedback-title"
-        >
-          <div className="feedback-header">
-            <div className="feedback-heading-group">
-              <h2 id="feedback-title">Student Feedback</h2>
-              <span className="feedback-sample-label">Sample data</span>
-            </div>
-            <label className="feedback-filter-wrap">
-              <span className="visually-hidden">Filter student feedback</span>
-              <select
-                value={categoryFilter}
-                onChange={(event) => setCategoryFilter(event.target.value)}
-              >
-                <option>View all</option>
-                {assignment.categories.map((category) => (
-                  <option key={category.name}>{category.name}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <ul className="feedback-list">
-            {visibleFeedback.map((item) => (
-              <li className="feedback-card" key={item.student}>
-                <div className="feedback-card-heading">
-                  <h3>{item.student}</h3>
-                  <span className="category-tag">{item.category}</span>
-                </div>
-                <p>{item.message}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <FeedbackPanel
+          title="Student Feedback"
+          categories={categoryNames}
+          items={assignment.feedback.map((item) => ({
+            heading: item.student,
+            category: item.category,
+            text: item.message,
+          }))}
+        />
       </div>
 
       <aside className={`assistant${chatOpen ? " assistant-open" : ""}`}>

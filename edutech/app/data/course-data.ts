@@ -20,12 +20,19 @@ export type Assignment = {
   feedback: StudentFeedback[];
 };
 
+export type RecurringTheme = {
+  title: string;
+  category: string;
+  summary: string;
+};
+
 export type Course = {
   id: string;
   code: string;
   name: string;
   description: string;
   assignments: Assignment[];
+  themes: RecurringTheme[];
 };
 
 const categoryColors = {
@@ -49,6 +56,8 @@ function categories(
   ];
 }
 
+export const categoryNames = categories(0, 0, 0, 0).map((category) => category.name);
+
 export const courses: Course[] = [
   {
     id: "cs-4385",
@@ -65,9 +74,9 @@ export const courses: Course[] = [
         submissionCount: 50,
         categories: categories(38, 22, 28, 12),
         feedback: [
-          { student: "Avery Brooks", category: "Clarifying concepts", message: "Asked AI to explain the difference between training and test data using a small example." },
-          { student: "Maya Chen", category: "Checking work", message: "Used a second set of eyes on my confusion-matrix calculations before submitting." },
-          { student: "Jordan Patel", category: "Brainstorming", message: "Explored possible features for the classification exercise, then chose and justified my own." },
+          { student: "Student 1", category: "Clarifying concepts", message: "Asked AI to explain the difference between a DFA and an NFA using a small example." },
+          { student: "Student 2", category: "Checking work", message: "Traced a few test strings through my DFA with AI to make sure it rejected the ones it should." },
+          { student: "Student 3", category: "Brainstorming", message: "Explored possible state designs for the \"ends in 01\" language, then built and justified my own machine." },
         ],
       },
       {
@@ -78,9 +87,9 @@ export const courses: Course[] = [
         submissionCount: 50,
         categories: categories(31, 29, 24, 16),
         feedback: [
-          { student: "Riley Morgan", category: "Clarifying concepts", message: "Had AI walk through how regularization changes the loss function in my own words." },
-          { student: "Samira Ali", category: "Brainstorming", message: "Compared a few approaches to handling an imbalanced dataset before choosing one." },
-          { student: "Noah Williams", category: "Checking work", message: "Asked AI to spot a shape mismatch in my gradient-descent pseudocode." },
+          { student: "Student 1", category: "Clarifying concepts", message: "Had AI walk through the subset construction so I could explain converting an NFA to a DFA in my own words." },
+          { student: "Student 2", category: "Brainstorming", message: "Compared a few choices of string for my pumping-lemma proof before choosing one." },
+          { student: "Student 3", category: "Checking work", message: "Asked AI to spot a missing case in my regular expression for strings with an even number of a's." },
         ],
       },
       {
@@ -91,11 +100,17 @@ export const courses: Course[] = [
         submissionCount: 50,
         categories: categories(42, 26, 18, 14),
         feedback: [
-          { student: "Taylor Nguyen", category: "Clarifying concepts", message: "Used AI to revisit recursion in a practice problem after the lecture notes didn't click." },
-          { student: "Casey Rivera", category: "Brainstorming", message: "Asked for ways to structure a response, then wrote the answer independently." },
-          { student: "Emerson Davis", category: "Checking work", message: "Checked a final calculation for a logic error and verified the correction myself." },
+          { student: "Student 1", category: "Clarifying concepts", message: "Used AI to revisit the pumping lemma on a practice problem after the lecture notes didn't click." },
+          { student: "Student 2", category: "Brainstorming", message: "Asked for ways to structure a proof, then wrote the answer independently." },
+          { student: "Student 3", category: "Checking work", message: "Checked a state diagram for a missing transition and verified the fix myself." },
         ],
       },
+    ],
+    themes: [
+      { title: "Pumping lemma proofs", category: "Clarifying concepts", summary: "Most cited difficulty across 2 assignments. 19 students asked AI to re-explain how to pick a string to pump." },
+      { title: "Designing states", category: "Brainstorming", summary: "Students use AI to sketch possible state designs before building their own machines, peaking on Homework 2 (29%)." },
+      { title: "Testing with sample strings", category: "Checking work", summary: "Students trace test strings through their DFAs and regular expressions to catch missing cases. Highest on Homework 1 (28%)." },
+      { title: "Proof outlines", category: "Drafting answers", summary: "A smaller group asks AI for a proof outline, then writes the argument themselves. Highest on Homework 2 (16%)." },
     ],
   },
   {
@@ -113,9 +128,9 @@ export const courses: Course[] = [
         submissionCount: 50,
         categories: categories(24, 34, 18, 24),
         feedback: [
-          { student: "Parker Johnson", category: "Brainstorming", message: "Used AI to compare project questions and narrow our team to one we could answer with our data." },
-          { student: "Leila Hassan", category: "Drafting answers", message: "Asked for a clearer outline for the methods section, then wrote it using our actual process." },
-          { student: "Quinn Thompson", category: "Checking work", message: "Had AI review chart labels for clarity and checked each suggestion against the source data." },
+          { student: "Student 1", category: "Brainstorming", message: "Used AI to compare project questions and narrow our team to one we could answer with our data." },
+          { student: "Student 2", category: "Drafting answers", message: "Asked for a clearer outline for the methods section, then wrote it using our actual process." },
+          { student: "Student 3", category: "Checking work", message: "Had AI review chart labels for clarity and checked each suggestion against the source data." },
         ],
       },
       {
@@ -126,9 +141,9 @@ export const courses: Course[] = [
         submissionCount: 49,
         categories: categories(29, 32, 25, 14),
         feedback: [
-          { student: "Sofia Martinez", category: "Brainstorming", message: "Brainstormed ways to divide the remaining analysis tasks across our project group." },
-          { student: "Ethan Brooks", category: "Checking work", message: "Asked AI to check whether the percentages in my progress summary added up correctly." },
-          { student: "Amara Wilson", category: "Clarifying concepts", message: "Got a plain-language explanation of the sampling limitation I needed to discuss." },
+          { student: "Student 1", category: "Brainstorming", message: "Brainstormed ways to divide the remaining analysis tasks across our project group." },
+          { student: "Student 2", category: "Checking work", message: "Asked AI to check whether the percentages in my progress summary added up correctly." },
+          { student: "Student 3", category: "Clarifying concepts", message: "Got a plain-language explanation of the sampling limitation I needed to discuss." },
         ],
       },
       {
@@ -139,11 +154,17 @@ export const courses: Course[] = [
         submissionCount: 49,
         categories: categories(45, 20, 23, 12),
         feedback: [
-          { student: "Dylan Kim", category: "Clarifying concepts", message: "Asked AI to distinguish correlation from causation with an example from class." },
-          { student: "Nia Patel", category: "Checking work", message: "Used AI to verify a confidence-interval calculation, then recomputed it by hand." },
-          { student: "Lucas Reed", category: "Brainstorming", message: "Generated a few examples to help remember when a median is more useful than a mean." },
+          { student: "Student 1", category: "Clarifying concepts", message: "Asked AI to distinguish correlation from causation with an example from class." },
+          { student: "Student 2", category: "Checking work", message: "Used AI to verify a confidence-interval calculation, then recomputed it by hand." },
+          { student: "Student 3", category: "Brainstorming", message: "Generated a few examples to help remember when a median is more useful than a mean." },
         ],
       },
+    ],
+    themes: [
+      { title: "Statistics concepts", category: "Clarifying concepts", summary: "Peaks on the Midterm Exam (45%). Students ask AI to explain correlation vs. causation and sampling limits." },
+      { title: "Scoping the project", category: "Brainstorming", summary: "Groups use AI to narrow research questions and split up analysis tasks. Highest on the Term Project (34%)." },
+      { title: "Verifying calculations", category: "Checking work", summary: "Students check percentages and confidence intervals with AI, then recompute them by hand." },
+      { title: "Methods section outlines", category: "Drafting answers", summary: "Drafting help is concentrated on the Term Project (24%), mostly outlines for the methods section." },
     ],
   },
   {
@@ -161,9 +182,9 @@ export const courses: Course[] = [
         submissionCount: 50,
         categories: categories(32, 27, 29, 12),
         feedback: [
-          { student: "Kai Anderson", category: "Clarifying concepts", message: "Asked how to show a one-to-many relationship and compared the explanation with the rubric." },
-          { student: "Zoe Campbell", category: "Checking work", message: "Had AI check whether every foreign key in my diagram pointed to an existing entity." },
-          { student: "Mateo Garcia", category: "Brainstorming", message: "Used AI to list edge cases for our library-loan scenario before updating the diagram." },
+          { student: "Student 1", category: "Clarifying concepts", message: "Asked how to show a one-to-many relationship and compared the explanation with the rubric." },
+          { student: "Student 2", category: "Checking work", message: "Had AI check whether every foreign key in my diagram pointed to an existing entity." },
+          { student: "Student 3", category: "Brainstorming", message: "Used AI to list edge cases for our library-loan scenario before updating the diagram." },
         ],
       },
       {
@@ -174,9 +195,9 @@ export const courses: Course[] = [
         submissionCount: 49,
         categories: categories(35, 30, 21, 14),
         feedback: [
-          { student: "Ivy Robinson", category: "Clarifying concepts", message: "Asked for another explanation of total versus partial specialization with a new example." },
-          { student: "Omar Lewis", category: "Brainstorming", message: "Explored whether the scenario needed a weak entity before making the final design choice." },
-          { student: "Grace Park", category: "Checking work", message: "Used AI to look for attributes that might belong on a relationship instead of an entity." },
+          { student: "Student 1", category: "Clarifying concepts", message: "Asked for another explanation of total versus partial specialization with a new example." },
+          { student: "Student 2", category: "Brainstorming", message: "Explored whether the scenario needed a weak entity before making the final design choice." },
+          { student: "Student 3", category: "Checking work", message: "Used AI to look for attributes that might belong on a relationship instead of an entity." },
         ],
       },
       {
@@ -187,9 +208,9 @@ export const courses: Course[] = [
         submissionCount: 50,
         categories: categories(23, 16, 39, 22),
         feedback: [
-          { student: "Miles Turner", category: "Checking work", message: "Asked AI to review my CREATE TABLE statements for missing constraints and checked each one." },
-          { student: "Aisha Bennett", category: "Clarifying concepts", message: "Got help understanding why a composite key fit the table better than a single-column key." },
-          { student: "Theo Price", category: "Drafting answers", message: "Used a suggested SQL syntax pattern as a reference, then adapted and tested the script." },
+          { student: "Student 1", category: "Checking work", message: "Asked AI to review my CREATE TABLE statements for missing constraints and checked each one." },
+          { student: "Student 2", category: "Clarifying concepts", message: "Got help understanding why a composite key fit the table better than a single-column key." },
+          { student: "Student 3", category: "Drafting answers", message: "Used a suggested SQL syntax pattern as a reference, then adapted and tested the script." },
         ],
       },
       {
@@ -200,11 +221,17 @@ export const courses: Course[] = [
         submissionCount: 50,
         categories: categories(17, 21, 36, 26),
         feedback: [
-          { student: "Elena Foster", category: "Checking work", message: "Had AI help trace why my generated records violated a foreign-key constraint." },
-          { student: "Benjamin Scott", category: "Drafting answers", message: "Used a short code example to get started with Faker, then tailored fields to my schema." },
-          { student: "Priya Shah", category: "Brainstorming", message: "Asked for realistic test-data cases, including empty values and duplicate-looking names." },
+          { student: "Student 1", category: "Checking work", message: "Had AI help trace why my generated records violated a foreign-key constraint." },
+          { student: "Student 2", category: "Drafting answers", message: "Used a short code example to get started with Faker, then tailored fields to my schema." },
+          { student: "Student 3", category: "Brainstorming", message: "Asked for realistic test-data cases, including empty values and duplicate-looking names." },
         ],
       },
+    ],
+    themes: [
+      { title: "Relationships and keys", category: "Clarifying concepts", summary: "Most cited difficulty across 3 assignments. Students ask AI to re-explain one-to-many relationships and composite keys." },
+      { title: "Scenario edge cases", category: "Brainstorming", summary: "Students list edge cases with AI before finalizing their designs, mostly on the Logical and EER Diagrams." },
+      { title: "Constraint checks", category: "Checking work", summary: "AI use for checking work rises on the coding assignments, peaking on the DDL Script (39%)." },
+      { title: "Starter code", category: "Drafting answers", summary: "Students adapt short SQL and Faker examples to their own schema. Highest on the Python Faker Script (26%)." },
     ],
   },
 ];
