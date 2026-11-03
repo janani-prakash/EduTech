@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Professor Dashboard - AI Usage Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #dd0e0e; /* Profile color */
+      --primary-bright: #eeeaea; /* AI Color name */
+      --primary-dim: rgba(15, 11, 11, 0.35); /* AI Profile color */
+      --bg: #f5f7fa; 
+      --bg2: #0b65e3;
+      --bg3: #edebe4;
+      --bg4: #4b5563;
+      --text: #eff2f5;
+      --text2: #000305;
+      --text3: #000000;
+      --text4: #ffffff;
+      --border: rgba(219, 25, 25, 0.08);
+      --font: 'Inter', sans-serif;
+      --radius: 8px;
+    }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+    }
+
+    /* ── Chatbot Container ── */
+    .chat-container {
+      width: 100%;
+      max-width: 900px;
+      height: 90vh;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      padding: 15px 26px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .page-title { font-size: 18px; font-weight: 600; letter-spacing: -0.4px; }
+    .role-pill-solid {
+      background: var(--primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Chat Messaging Area ── */
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+    .chat-area::-webkit-scrollbar { width: 4px; }
+    .chat-area::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
+
+    .msg { display: flex; gap: 12px; align-items: flex-start; animation: fadeUp 0.25s ease; }
+    .msg.user { flex-direction: row-reverse; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .msg-av {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .bot-av { background: var(--primary-dim); color: var(--primary-bright); border: 1px solid rgba(99, 102, 241, 0.3); }
+    .usr-av { background: #1b2a40; color: #4499FF; border: 1px solid rgba(68, 153, 255, 0.3); }
+
+    .bubble { max-width: 75%; padding: 13px 16px; font-size: 13px; line-height: 1.65; border-radius: 4px 14px 14px 14px; }
+    .bot-b { background: var(--bg2); border: 1px solid var(--border); }
+    .usr-b { background: var(--primary); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 14px 4px 14px 14px; }
+
+    /* Custom Badges */
+    .tag-r { display: inline-flex; background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+    .tag-g { display: inline-flex; background: rgba(34, 197, 94, 0.2); color: #86efac; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+    .tag-b { display: inline-flex; background: rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+
+    /* Typing Animation */
+    .typing-bubble { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; }
+    .typing-bubble span { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); display: inline-block; animation: bounce 1.2s infinite; }
+    .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); background: var(--text2); } }
+
+    /* Quick Action Suggestion Chips */
+    .chips { display: flex; gap: 8px; padding: 10px 26px; flex-wrap: wrap; background: var(--bg); border-top: 1px solid var(--border); }
+    .chip { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 11px; color: var(--text2); cursor: pointer; transition: background 0.12s, color 0.12s; }
+    .chip:hover { background: var(--bg4); color: var(--text); }
+
+    /* Input Bar */
+    .input-row { padding: 14px 26px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 10px; flex-shrink: 0; }
+    .chat-in { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 16px; font-size: 13px; color: var(--text); outline: none; font-family: var(--font); transition: border-color 0.15s; }
+    .chat-in:focus { border-color: var(--primary-bright); }
+    .chat-in::placeholder { color: var(--text3); }
+    .send-btn { background: var(--primary); border: none; border-radius: var(--radius); padding: 11px 24px; font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; font-family: var(--font); transition: background 0.12s; }
+    .send-btn:hover { background: #4338ca; }
+    .send-btn:disabled { background: var(--bg4); color: var(--text3); cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <div class="chat-container">
+    <!-- Top Bar Header -->
+    <div class="topbar">
+      <div class="page-title">AI Usage Assistant</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:11px;color:var(--text4);">Student Integrity &amp; AI Analytics</span>
+        <span class="role-pill-solid">PROFESSOR MODE</span>
+      </div>
+    </div>
+
+    <!-- Chat Messages Window -->
+    <div class="chat-area" id="chatArea">
+      <div class="msg">
+        <div class="msg-av bot-av">AI</div>
+        <div class="bubble bot-b">
+          Hello Professor! I am your AI Usage Analytics Assistant. I can help you review student AI submission logs, flag high reliance on LLMs, or summarize how AI tools were integrated into recent assignments. What would you like to inspect today?
+        </div>
+      </div>
+    </div>
+
+    <!-- Clickable Quick Action Chips -->
+    <div class="chips">
+      <div class="chip">Summarize class AI usage</div>
+      <div class="chip">Show unflagged submissions</div>
+      <div class="chip">Export AI integrity report</div>
+      <div class="chip">Check prompt histories</div>
+    </div>
+
+    <!-- User Input Control -->
+    <div class="input-row">
+      <input class="chat-in" id="chatInput" placeholder="Ask about student reports, AI percentages, prompt logs..." />
+      <button class="send-btn" id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    var chatArea = document.getElementById('chatArea');
+    var chatInput = document.getElementById('chatInput');
+    var sendBtn = document.getElementById('sendBtn');
+
+    // Preset responses tailored for professors querying AI reports
+    var botReplies = [
+      "I've updated the class dashboard. Would you like me to highlight submissions with over 50% AI generation?",
+      "Checking prompt history logs now... Most students utilized AI for brainstorming and structuring outlines.",
+      "Generated the compliance summary for your section. <strong>32 students</strong> submitted full AI conversation transcripts alongside their reports.",
+      "The integrity report has been prepared for download. High-risk submissions have been grouped at the top.",
+      "Filter applied. Surfacing all student reports where AI was used for direct code generation."
+    ];
+    var replyIdx = 0;
+
+    function scrollChat() {
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function addMsg(html, isUser) {
+      var msg = document.createElement('div');
+      msg.className = 'msg' + (isUser ? ' user' : '');
+      var av = isUser ? 'PR' : 'AI';
+      var avClass = isUser ? 'usr-av' : 'bot-av';
+      
+      msg.innerHTML = (isUser ? '' : '<div class="msg-av ' + avClass + '">' + av + '</div>') +
+        '<div class="bubble ' + (isUser ? 'usr-b' : 'bot-b') + '">' + html + '</div>' +
+        (isUser ? '<div class="msg-av ' + avClass + '">' + av + '</div>' : '');
+        
+      chatArea.appendChild(msg);
+      scrollChat();
+    }
+
+    function showTyping() {
+      var m = document.createElement('div');
+      m.className = 'msg';
+      m.id = 'typingMsg';
+      m.innerHTML = '<div class="msg-av bot-av">AI</div><div class="typing-bubble"><span></span><span></span><span></span></div>';
+      chatArea.appendChild(m);
+      scrollChat();
+    }
+
+    function removeTyping() {
+      var t = document.getElementById('typingMsg');
+      if (t) t.remove();
+    }
+
+    function sendMessage(text) {
+      text = text.trim();
+      if (!text) return;
+
+      chatInput.value = '';
+      sendBtn.disabled = true;
+
+      // Add User Message
+      addMsg(text, true);
+      
+      // Simulate Bot Thinking & Typing
+      showTyping();
+      setTimeout(function() {
+        removeTyping();
+        addMsg(botReplies[replyIdx % botReplies.length], false);
+        replyIdx++;
+        sendBtn.disabled = false;
+        chatInput.focus();
+      }, 900 + Math.random() * 500);
+    }
+
+    // Event Listeners
+    sendBtn.addEventListener('click', function() { 
+      sendMessage(chatInput.value); 
+    });
+
+    chatInput.addEventListener('keydown', function(e) { 
+      if (e.key === 'Enter') sendMessage(chatInput.value); 
+    });
+
+    document.querySelectorAll('.chip').forEach(function(chip) {
+      chip.addEventListener('click', function() { 
+        sendMessage(chip.textContent); 
+      });
+    });
+  </script>
+</body>
+</html>
