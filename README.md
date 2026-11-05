@@ -1,2 +1,1 @@
-# EduTech
-CS 4352 Design Project
+Html and txt files
