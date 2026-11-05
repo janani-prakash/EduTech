@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import AppHeader from "../../components/app-header";
 import CourseHeader from "../../components/course-header";
 import FeedbackPanel from "../../components/feedback-panel";
+import SemesterTrends from "../../components/semester-trends";
 import { categoryNames, courses, getCourse } from "../../data/course-data";
 
 type SemesterPageProps = {
@@ -21,18 +22,6 @@ async function SemesterContent({ params }: SemesterPageProps) {
     notFound();
   }
 
-  const { assignments } = course;
-  const averageUsage = Math.round(
-    assignments.reduce((total, item) => total + item.usagePercentage, 0) /
-      assignments.length,
-  );
-  const peak = assignments.reduce((top, item) =>
-    item.usagePercentage > top.usagePercentage ? item : top,
-  );
-  const lowest = assignments.reduce((low, item) =>
-    item.usagePercentage < low.usagePercentage ? item : low,
-  );
-
   return (
     <>
       <AppHeader />
@@ -41,16 +30,7 @@ async function SemesterContent({ params }: SemesterPageProps) {
 
         <div className="dashboard-grid">
           <section className="dashboard-left" aria-label="Semester AI usage summary">
-            <section className="usage-stat" aria-label="Average AI usage">
-              <p className="usage-percentage">{averageUsage}%</p>
-              <p className="usage-description">
-                average AI usage across {assignments.length} assignments
-              </p>
-              <p className="usage-detail">
-                Peak: {peak.name} ({peak.usagePercentage}%) · Lowest:{" "}
-                {lowest.name} ({lowest.usagePercentage}%)
-              </p>
-            </section>
+            <SemesterTrends course={course} />
           </section>
 
           <FeedbackPanel
