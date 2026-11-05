@@ -77,6 +77,25 @@ export default function CoursesPage() {
                           </option>
                         ))}
                       </select>
+                      <button
+                        type="button"
+                        style={{
+                          marginTop: 10,
+                          width: "100%",
+                          padding: "9px 12px",
+                          font: "inherit",
+                          fontSize: 14,
+                          fontWeight: 500,
+                          color: "#fff",
+                          background: "#4f46e5",
+                          border: "none",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                        }}
+                        onClick={() => router.push(`/courses/${course.id}`)}
+                      >
+                        View semester trends
+                      </button>
                     </div>
                   )}
                 </article>
