@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Professor Dashboard - AI Usage Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #dd0e0e; /* Profile color */
+      --primary-bright: #eeeaea; /* AI Color name */
+      --primary-dim: rgba(15, 11, 11, 0.35); /* AI Profile color */
+      --bg: #f5f7fa; 
+      --bg2: #0b65e3;
+      --bg3: #edebe4;
+      --bg4: #4b5563;
+      --text: #eff2f5;
+      --text2: #000305;
+      --text3: #000000;
+      --text4: #ffffff;
+      --border: rgba(219, 25, 25, 0.08);
+      --font: 'Inter', sans-serif;
+      --radius: 8px;
+    }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+    }
+
+    /* ── Chatbot Container ── */
+    .chat-container {
+      width: 100%;
+      max-width: 900px;
+      height: 90vh;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      padding: 15px 26px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .page-title { font-size: 18px; font-weight: 600; letter-spacing: -0.4px; }
+    .role-pill-solid {
+      background: var(--primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Chat Messaging Area ── */
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+    .chat-area::-webkit-scrollbar { width: 4px; }
+    .chat-area::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
+
+    .msg { display: flex; gap: 12px; align-items: flex-start; animation: fadeUp 0.25s ease; }
+    .msg.user { flex-direction: row-reverse; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .msg-av {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .bot-av { background: var(--primary-dim); color: var(--primary-bright); border: 1px solid rgba(99, 102, 241, 0.3); }
+    .usr-av { background: #1b2a40; color: #4499FF; border: 1px solid rgba(68, 153, 255, 0.3); }
+
+    .bubble { max-width: 75%; padding: 13px 16px; font-size: 13px; line-height: 1.65; border-radius: 4px 14px 14px 14px; }
+    .bot-b { background: var(--bg2); border: 1px solid var(--border); }
+    .usr-b { background: var(--primary); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 14px 4px 14px 14px; }
+
+    /* Custom Badges */
+    .tag-r { display: inline-flex; background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+    .tag-g { display: inline-flex; background: rgba(34, 197, 94, 0.2); color: #86efac; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+    .tag-b { display: inline-flex; background: rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+
+    /* Typing Animation */
+    .typing-bubble { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; padding: 14px 18px; display: flex; gap: 5px; align-items: center; }
+    .typing-bubble span { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); display: inline-block; animation: bounce 1.2s infinite; }
+    .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); background: var(--text2); } }
+
+    /* Quick Action Suggestion Chips */
+    .chips { display: flex; gap: 8px; padding: 10px 26px; flex-wrap: wrap; background: var(--bg); border-top: 1px solid var(--border); }
+    .chip { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 11px; color: var(--text2); cursor: pointer; transition: background 0.12s, color 0.12s; }
+    .chip:hover { background: var(--bg4); color: var(--text); }
+
+    /* Input Bar */
+    .input-row { position: relative; padding: 14px 26px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 10px; flex-shrink: 0; }
+    .chat-in { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 16px; font-size: 13px; color: var(--text); outline: none; font-family: var(--font); transition: border-color 0.15s; }
+    .chat-in:focus { border-color: var(--primary-bright); }
+    .chat-in::placeholder { color: var(--text3); }
+    .send-btn { background: var(--primary); border: none; border-radius: var(--radius); padding: 11px 24px; font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; font-family: var(--font); transition: background 0.12s; }
+    .send-btn:hover { background: #4338ca; }
+    .send-btn:disabled { background: var(--bg4); color: var(--text3); cursor: not-allowed; }
+    .question-menu { position: absolute; z-index: 2; right: 26px; bottom: calc(100% - 6px); left: 26px; max-height: 260px; overflow-y: auto; padding: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); }
+    .question-menu[hidden] { display: none; }
+    .question-option { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 5px; background: transparent; color: var(--text2); text-align: left; font: 400 12px var(--font); cursor: pointer; }
+    .question-option:hover, .question-option:focus-visible { background: var(--bg3); outline: none; }
+    .assignment-panel { padding: 12px 26px; background: var(--bg); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex-shrink: 0; }
+    .file-input { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .file-label, .draft-btn { border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 13px; font: 500 12px var(--font); cursor: pointer; }
+    .file-label { background: var(--bg3); color: var(--text2); }
+    .file-label:hover { background: var(--bg4); color: var(--text); }
+    .file-input:focus-visible + .file-label { outline: 2px solid var(--primary-bright); outline-offset: 2px; }
+    .file-status { color: var(--text2); font-size: 10px; overflow-wrap: anywhere; }
+    .draft-btn { background: var(--primary); color: #fff; font-weight: 600; }
+    .draft-btn:hover:not(:disabled) { background: #4338ca; }
+    .draft-btn:disabled { background: var(--bg4); color: var(--text3); cursor: not-allowed; }
+    .assignment-note { flex-basis: 100%; color: var(--text2); font-size: 10px; }
+    .rule-list { margin: 8px 0 0; padding-left: 22px; }
+    .rule-list li { margin: 5px 0; }
+    @media (max-width: 640px) {
+      .assignment-panel { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-container">
+    <!-- Top Bar Header -->
+    <div class="topbar">
+      <div class="page-title">AI Usage Assistant</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:11px;color:var(--text4);">Student Integrity &amp; AI Analytics</span>
+        <span class="role-pill-solid">PROFESSOR MODE</span>
+      </div>
+    </div>
+
+    <!-- Chat Messages Window -->
+    <div class="chat-area" id="chatArea">
+      <div class="msg">
+        <div class="msg-av bot-av">AI</div>
+        <div class="bubble bot-b">
+          Hello Professor! I am your AI Usage Analytics Assistant. I can help you review student AI submission logs, flag high reliance on LLMs, or summarize how AI tools were integrated into recent assignments. What would you like to inspect today?
+        </div>
+      </div>
+    </div>
+
+    <!-- Clickable Quick Action Chips -->
+    <div class="chips">
+      <div class="chip">Summarize class AI usage</div>
+      <div class="chip">Show unflagged submissions</div>
+      <div class="chip">Export AI integrity report</div>
+      <div class="chip">Check prompt histories</div>
+    </div>
+
+    <div class="assignment-panel">
+      <input class="file-input" id="reportFile" type="file" accept=".txt,text/plain" multiple aria-describedby="reportStatus assignmentNote" />
+      <label class="file-label" for="reportFile">Upload AI Usage report(s) (.txt)</label>
+      <span class="file-status" id="reportStatus" role="status">No report selected</span>
+      <button class="draft-btn" id="analyzeReportBtn" type="button" disabled>Analyze report</button>
+    </div>
+
+    <!-- User Input Control -->
+    <div class="input-row">
+      <div class="question-menu" id="questionMenu" role="group" aria-label="Suggested questions" hidden></div>
+      <input class="chat-in" id="chatInput" placeholder="Ask about student reports, AI percentages, prompt logs..." aria-haspopup="true" aria-controls="questionMenu" aria-expanded="false" />
+      <button class="send-btn" id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    var chatArea = document.getElementById('chatArea');
+    var chatInput = document.getElementById('chatInput');
+    var sendBtn = document.getElementById('sendBtn');
+    var reportFile = document.getElementById('reportFile');
+    var reportStatus = document.getElementById('reportStatus');
+    var analyzeReportBtn = document.getElementById('analyzeReportBtn');
+    var questionMenu = document.getElementById('questionMenu');
+    var report = null;
+    var fileReadId = 0;
+    var suggestedQuestions = [
+      { text: 'Question 1', answer: '' },
+      { text: 'Question 2', answer: '' },
+      { text: 'Question 3', answer: '' },
+      { text: 'Question 4', answer: '' },
+      { text: 'Question 5', answer: '' }
+    ];
+
+    suggestedQuestions.forEach(function(item) {
+      var option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'question-option';
+      option.textContent = item.text;
+      option.addEventListener('click', function() {
+        hideQuestionMenu();
+        sendMessage(item.text, false);
+      });
+      questionMenu.appendChild(option);
+    });
+
+    function showQuestionMenu() {
+      questionMenu.hidden = false;
+      chatInput.setAttribute('aria-expanded', 'true');
+    }
+
+    function hideQuestionMenu() {
+      questionMenu.hidden = true;
+      chatInput.setAttribute('aria-expanded', 'false');
+    }
+
+    function scrollChat() {
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function addMsg(html, isUser) {
+      var msg = document.createElement('div');
+      msg.className = 'msg' + (isUser ? ' user' : '');
+      var av = isUser ? 'PR' : 'AI';
+      var avClass = isUser ? 'usr-av' : 'bot-av';
+      
+      msg.innerHTML = (isUser ? '' : '<div class="msg-av ' + avClass + '">' + av + '</div>') +
+        '<div class="bubble ' + (isUser ? 'usr-b' : 'bot-b') + '">' + (isUser ? escapeHtml(html) : html) + '</div>' +
+        (isUser ? '<div class="msg-av ' + avClass + '">' + av + '</div>' : '');
+        
+      chatArea.appendChild(msg);
+      scrollChat();
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, function(character) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+      });
+    }
+
+    function showTyping() {
+      var m = document.createElement('div');
+      m.className = 'msg';
+      m.id = 'typingMsg';
+      m.innerHTML = '<div class="msg-av bot-av">AI</div><div class="typing-bubble"><span></span><span></span><span></span></div>';
+      chatArea.appendChild(m);
+      scrollChat();
+    }
+
+    function removeTyping() {
+      var t = document.getElementById('typingMsg');
+      if (t) t.remove();
+    }
+
+    var usageCategories = [
+      {
+        name: 'brainstorming',
+        pattern: /\b(brainstorm(?:ing)?|ideas?|idea generation|generating ideas|outlining|outline)\b/i,
+        suggestions: [
+          'AI may be used to brainstorm ideas and organize an outline.',
+          'Students must write submitted arguments and final prose themselves; AI-generated text must not be submitted as their own.',
+          'Students should disclose meaningful AI assistance in their submission.'
+        ]
+      },
+      {
+        name: 'drafting and writing',
+        pattern: /\b(draft(?:ing)?|writing|write|essay|compose|paragraph|generate text)\b/i,
+        suggestions: [
+          'Specify whether AI-generated prose is allowed; unless explicitly permitted, students must write submitted work themselves.',
+          'Require students to disclose and identify any AI-generated text they use.',
+          'Students remain responsible for the accuracy, sources, and originality of submitted work.'
+        ]
+      },
+      {
+        name: 'editing and feedback',
+        pattern: /\b(edit(?:ing)?|proofread(?:ing)?|grammar|feedback|revise|revision)\b/i,
+        suggestions: [
+          'AI may provide spelling, grammar, and feedback suggestions, but students must make and understand their own revisions.',
+          'Students must not submit substantial AI rewrites as their own unless the assignment explicitly permits them.',
+          'Require disclosure when AI feedback materially shapes the submitted work.'
+        ]
+      },
+      {
+        name: 'research and summarizing',
+        pattern: /\b(research|summari[sz](?:e|ing|ation)|sources?|literature review|fact.?check)\b/i,
+        suggestions: [
+          'AI may help locate topics or summarize material, but students must consult and cite original, credible sources.',
+          'Students must independently verify AI-provided facts and references.',
+          'Require disclosure of AI assistance used in research or summarization.'
+        ]
+      },
+      {
+        name: 'coding',
+        pattern: /\b(cod(?:e|ing)|programming|debug(?:ging)?|script)\b/i,
+        suggestions: [
+          'State whether AI-generated code is allowed and identify any parts students must implement independently.',
+          'Students must understand, test, and be able to explain code they submit.',
+          'Require disclosure of AI-generated or AI-modified code.'
+        ]
+      }
+    ];
+
+    function updateAnalyzeButton() {
+      analyzeReportBtn.disabled = !report;
+    }
+
+    function readReportFile() {
+      var files = Array.prototype.slice.call(reportFile.files || []);
+      var thisReadId = ++fileReadId;
+      report = null;
+      analyzeReportBtn.disabled = true;
+      if (!files.length) {
+        reportStatus.textContent = 'No report selected';
+        return;
+      }
+      if (files.some(function(file) { return !/\.txt$/i.test(file.name); })) {
+        reportFile.value = '';
+        reportStatus.textContent = 'Please choose .txt reports only.';
+        return;
+      }
+
+      reportStatus.textContent = 'Reading ' + files.length + ' report(s)...';
+      Promise.all(files.map(function(file) {
+        return file.text().then(function(text) {
+          return { name: file.name, text: text };
+        });
+      })).then(function(reports) {
+        if (thisReadId !== fileReadId) return;
+        if (reports.some(function(item) { return !item.text.trim(); })) {
+          reportStatus.textContent = 'One or more selected reports are empty.';
+          return;
+        }
+        report = {
+          name: reports.map(function(item) { return item.name; }).join(', '),
+          text: reports.map(function(item) { return item.text; }).join('\n'),
+          reportCount: reports.length
+        };
+        reportStatus.textContent = reports.length + ' report(s) selected';
+        updateAnalyzeButton();
+      }).catch(function(error) {
+        if (thisReadId !== fileReadId) return;
+        reportStatus.textContent = 'Could not read the selected reports. Please try again.';
+        console.error('Unable to read AI Usage report:', error);
+      });
+    }
+
+    function analyzeUsageReport(text) {
+      var lines = text.split(/\r?\n/).map(function(line) { return line.trim(); }).filter(Boolean);
+      var entries = lines.map(function(line) {
+        var match = line.match(/^(.*?)\s+(\d+(?:\.\d+)?)\s*%\s*AI\b.*?(\d+(?:\.\d+)?)\s*%\s*student\b/i);
+        if (!match) return null;
+
+        var aiPercentage = Number(match[2]);
+        var studentPercentage = Number(match[3]);
+        if (!match[1].trim() || aiPercentage > 100 || studentPercentage > 100) return null;
+
+        return {
+          category: match[1].trim(),
+          aiPercentage: aiPercentage,
+          studentPercentage: studentPercentage
+        };
+      }).filter(Boolean);
+      var categoryReports = [];
+      entries.forEach(function(entry) {
+        var existing = categoryReports.find(function(category) {
+          return category.name.toLowerCase() === entry.category.toLowerCase();
+        });
+        if (existing) {
+          existing.aiTotal += entry.aiPercentage;
+          existing.studentTotal += entry.studentPercentage;
+          existing.count++;
+        } else {
+          categoryReports.push({
+            name: entry.category,
+            aiTotal: entry.aiPercentage,
+            studentTotal: entry.studentPercentage,
+            count: 1
+          });
+        }
+      });
+      categoryReports.forEach(function(category) {
+        category.aiPercentage = category.aiTotal / category.count;
+        category.studentPercentage = category.studentTotal / category.count;
+      });
+
+      var counts = usageCategories.map(function(category) {
+        var categoryEntries = entries.filter(function(entry) { return category.pattern.test(entry.category); });
+        return {
+          name: category.name,
+          count: categoryEntries.length,
+          suggestions: category.suggestions
+        };
+      });
+      var maxCount = counts.reduce(function(max, category) { return Math.max(max, category.count); }, 0);
+      var suggestedCategories = [];
+      var suggestedNames = {};
+      categoryReports.filter(function(category) { return category.aiPercentage > 25; }).forEach(function(category) {
+        var matchedCategory = usageCategories.find(function(usageCategory) {
+          return usageCategory.pattern.test(category.name);
+        });
+        var name = matchedCategory ? matchedCategory.name : category.name;
+        if (suggestedNames[name.toLowerCase()]) return;
+        suggestedNames[name.toLowerCase()] = true;
+        suggestedCategories.push({
+          name: name,
+          aiPercentage: category.aiPercentage,
+          suggestions: matchedCategory ? matchedCategory.suggestions : [
+            'Require students to disclose meaningful AI assistance.',
+            'Students must verify AI-provided information and understand and take responsibility for their submitted work.'
+          ]
+        });
+      });
+      return {
+        categoryReports: categoryReports,
+        counts: counts,
+        dominant: maxCount ? counts.filter(function(category) { return category.count === maxCount; }) : [],
+        suggestedCategories: suggestedCategories
+      };
+    }
+
+    function makeReportSuggestion() {
+      var analysis = analyzeUsageReport(report.text);
+      var dominantText = analysis.dominant.length
+        ? analysis.dominant.map(function(category) { return category.name; }).join(' and ')
+        : 'no clear category';
+      var countsList = analysis.counts.filter(function(category) { return category.count; }).map(function(category) {
+        return '<li>' + escapeHtml(category.name) + ': ' + category.count + ' report line(s)</li>';
+      }).join('');
+      var categoryPercentages = analysis.categoryReports.map(function(category) {
+        return '<li>' + escapeHtml(category.name) + ': ' +
+          category.aiPercentage.toFixed(1) + '% AI, ' +
+          category.studentPercentage.toFixed(1) + '% student</li>';
+      }).join('');
+      var suggestionList = analysis.suggestedCategories.flatMap(function(category) {
+        return category.suggestions;
+      }).map(function(suggestion) {
+        return '<li>' + escapeHtml(suggestion) + '</li>';
+      }).join('');
+      var reportTitle = report.reportCount > 1 ? 'AI Usage reports' : 'AI Usage report';
+      return '<strong>' + reportTitle + ' for "' + escapeHtml(report.name) + '"</strong>' +
+        '<p>Most commonly reported use: <strong>' + escapeHtml(dominantText) + '</strong></p>' +
+        '<p>Reported category percentages:</p>' +
+        '<ul class="rule-list">' + (categoryPercentages || '<li>No lines matching “category % AI % student” were found.</li>') + '</ul>' +
+        '<ul class="rule-list">' + (countsList || '<li>No recognized usage categories were found in the report.</li>') + '</ul>' +
+        '<strong>Suggested AI Use requirements for the next assignment</strong>' +
+        (suggestionList
+          ? '<p>Suggestions are included only for categories with AI use above 25%: ' +
+            escapeHtml(analysis.suggestedCategories.map(function(category) {
+              return category.name + ' (' + category.aiPercentage.toFixed(1) + '% AI)';
+            }).join(', ')) + '.</p>' +
+            '<ul class="rule-list">' + suggestionList + '</ul><p>These are draft suggestions based on the usage categories found in this report. Review and adjust them for the next assignment.</p>'
+          : '<p>No suggestions were made because no reported category had AI use above 25%.</p>');
+    }
+
+    function makeClassUsageSummary() {
+      var analysis = analyzeUsageReport(report.text);
+      var totalCategoryLines = analysis.categoryReports.reduce(function(total, category) {
+        return total + category.count;
+      }, 0);
+      var totalAi = analysis.categoryReports.reduce(function(total, category) {
+        return total + category.aiPercentage * category.count;
+      }, 0);
+      var totalStudent = analysis.categoryReports.reduce(function(total, category) {
+        return total + category.studentPercentage * category.count;
+      }, 0);
+      var categoryList = analysis.categoryReports.map(function(category) {
+        return '<li>' + escapeHtml(category.name) + ': ' +
+          category.aiPercentage.toFixed(1) + '% AI, ' +
+          category.studentPercentage.toFixed(1) + '% student (' +
+          category.count + ' report line(s))</li>';
+      }).join('');
+      var highAiCategories = analysis.categoryReports.filter(function(category) {
+        return category.aiPercentage > 25;
+      });
+      var highAiText = highAiCategories.length
+        ? '<p>Categories above 25% AI: ' + escapeHtml(highAiCategories.map(function(category) {
+            return category.name + ' (' + category.aiPercentage.toFixed(1) + '%)';
+          }).join(', ')) + '.</p>'
+        : '<p>No reported category is above 25% AI.</p>';
+      var reportLabel = report.reportCount === 1 ? 'report' : 'reports';
+      var categoryLineLabel = totalCategoryLines === 1 ? 'category line' : 'category lines';
+
+      return '<strong>Class AI usage summary</strong>' +
+        '<p>Reviewed ' + report.reportCount + ' ' + reportLabel + ', with ' +
+        totalCategoryLines + ' ' + categoryLineLabel + ' matching the report format.</p>' +
+        (totalCategoryLines
+          ? '<p>Across those category lines, average usage was ' +
+            (totalAi / totalCategoryLines).toFixed(1) + '% AI and ' +
+            (totalStudent / totalCategoryLines).toFixed(1) + '% student.</p>' +
+            '<p>Usage by category:</p><ul class="rule-list">' + categoryList + '</ul>' +
+            highAiText
+          : '<p>No lines matching “category % AI % student” were found in the selected reports.</p>');
+    }
+
+    function summarizeClassUsage() {
+      addMsg('Summarize class AI usage', true);
+      if (!report) {
+        addMsg('Upload one or more AI Usage reports first, then select “Summarize class AI usage” again.', false);
+        return;
+      }
+
+      showTyping();
+      setTimeout(function() {
+        removeTyping();
+        addMsg(makeClassUsageSummary(), false);
+      }, 500);
+    }
+
+    function getChatResponse(question) {
+      var configuredQuestion = suggestedQuestions.find(function(item) {
+        return item.text.toLowerCase() === question.toLowerCase() && item.answer.trim();
+      });
+      if (configuredQuestion) return escapeHtml(configuredQuestion.answer);
+
+      if (/\b(report|usage|category|categories|percentage|percent|class|student|AI)\b/i.test(question)) {
+        if (!report) {
+          return 'Upload one or more AI Usage reports first, and I can answer this using their reported data.';
+        }
+        return makeClassUsageSummary();
+      }
+
+      return 'That answer is not configured yet. Add an answer for this question in the suggestedQuestions list to enable it.';
+    }
+
+    reportFile.addEventListener('change', readReportFile);
+
+    analyzeReportBtn.addEventListener('click', function() {
+      if (analyzeReportBtn.disabled) return;
+
+      addMsg('Analyze AI Usage report: ' + report.name, true);
+      analyzeReportBtn.disabled = true;
+      sendBtn.disabled = true;
+      showTyping();
+      setTimeout(function() {
+        removeTyping();
+        addMsg(makeReportSuggestion(), false);
+        updateAnalyzeButton();
+        sendBtn.disabled = false;
+      }, 500);
+    });
+
+    function sendMessage(text, refocusInput) {
+      text = text.trim();
+      if (!text) return;
+
+      chatInput.value = '';
+      sendBtn.disabled = true;
+
+      // Add User Message
+      addMsg(text, true);
+      
+      // Simulate Bot Thinking & Typing
+      showTyping();
+      setTimeout(function() {
+        removeTyping();
+        addMsg(getChatResponse(text), false);
+        sendBtn.disabled = false;
+        if (refocusInput !== false) chatInput.focus();
+      }, 900 + Math.random() * 500);
+    }
+
+    // Event Listeners
+    sendBtn.addEventListener('click', function() { 
+      sendMessage(chatInput.value); 
+    });
+
+    chatInput.addEventListener('keydown', function(e) { 
+      if (e.key === 'Enter') {
+        hideQuestionMenu();
+        sendMessage(chatInput.value);
+      }
+      if (e.key === 'Escape') hideQuestionMenu();
+    });
+    chatInput.addEventListener('focus', showQuestionMenu);
+    chatInput.addEventListener('click', showQuestionMenu);
+    document.addEventListener('click', function(event) {
+      if (!questionMenu.contains(event.target) && event.target !== chatInput) hideQuestionMenu();
+    });
+
+    document.querySelectorAll('.chip').forEach(function(chip) {
+      chip.addEventListener('click', function() { 
+        if (chip.textContent.trim() === 'Summarize class AI usage') {
+          summarizeClassUsage();
+          return;
+        }
+        sendMessage(chip.textContent); 
+      });
+    });
+  </script>
+</body>
+</html>
