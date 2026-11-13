@@ -1,0 +1,13 @@
+Questions
+1. How many submissions reported AI use, and what percentage is that?
+2. Which AI-use category was most common?
+3. What is the full category breakdown?
+4. What did students say about how they used AI?
+5. What should I follow up on with the class?
+
+Answers
+1. For {assignment}, {reportCount} of {submissionCount} submissions included an AI report ({usagePercentage}% reported AI use).
+2. The highest category is {topCategoryName} at {topCategoryPercentage}% of the reported category breakdown.
+3. {categoryBreakdown}
+4. {feedbackSummary}
+5. {followUpSuggestions}
